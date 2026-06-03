@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="description" content="Habit Tracker — трекер привычек с push-уведомлениями. FastAPI + PostgreSQL + чистый JS + PWA.">
+
+  <title>Habit Tracker</title>
+
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" href="/static/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- ============ Экран авторизации ============ -->
+  <section id="screen-auth" class="screen">
+    <div class="auth-card">
+      <header class="auth-header">
+        <h1>Habit Tracker</h1>
+        <p class="muted">Маленькие шаги — большие изменения</p>
+      </header>
+
+      <div class="tabs" role="tablist">
+        <button id="tab-login" class="tab active" data-form="login" role="tab">Вход</button>
+        <button id="tab-register" class="tab" data-form="register" role="tab">Регистрация</button>
+      </div>
+
+      <form id="form-login" class="auth-form">
+        <label>Email
+          <input type="email" name="email" required autocomplete="email">
+        </label>
+        <label>Пароль
+          <input type="password" name="password" required autocomplete="current-password" minlength="8">
+        </label>
+        <button type="submit" class="btn btn-primary">Войти</button>
+      </form>
+
+      <form id="form-register" class="auth-form hidden">
+        <label>Email
+          <input type="email" name="email" required autocomplete="email">
+        </label>
+        <label>Пароль (минимум 8 символов)
+          <input type="password" name="password" required autocomplete="new-password" minlength="8">
+        </label>
+        <button type="submit" class="btn btn-primary">Создать аккаунт</button>
+      </form>
+
+      <p id="auth-error" class="error-message hidden" role="alert"></p>
+    </div>
+  </section>
+
+  <!-- ============ Основной экран приложения ============ -->
+  <section id="screen-app" class="screen hidden">
+    <header class="app-header">
+      <h1>Мои привычки</h1>
+      <div class="header-actions">
+        <button id="btn-enable-push" class="btn btn-ghost" title="Включить уведомления">
+          <span>🔔</span>
+        </button>
+        <span id="user-email" class="muted user-email"></span>
+        <button id="btn-logout" class="btn btn-ghost">Выйти</button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <div class="toolbar">
+        <button id="btn-new-habit" class="btn btn-primary">+ Новая привычка</button>
+      </div>
+
+      <div id="habits-list" class="habits-grid">
+        <!-- карточки привычек вставляются здесь -->
+      </div>
+
+      <p id="habits-empty" class="empty-state hidden">
+        Пока нет ни одной привычки.<br>
+        Создай первую — например, «утренняя зарядка».
+      </p>
+    </main>
+  </section>
+
+  <!-- ============ Модалка: новая / редактирование привычки ============ -->
+  <div id="modal-habit" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" data-close="modal-habit"></div>
+    <div class="modal-content">
+      <h2 id="modal-habit-title">Новая привычка</h2>
+      <form id="form-habit">
+        <input type="hidden" name="habit_id" value="">
+        <label>Название
+          <input type="text" name="name" maxlength="120" required>
+        </label>
+        <label>Описание (необязательно)
+          <textarea name="description" maxlength="500" rows="2"></textarea>
+        </label>
+        <label>Цвет
+          <input type="color" name="color" value="#4f46e5">
+        </label>
+        <label>Цель: дней в неделю
+          <input type="number" name="target_per_week" min="1" max="7" value="7">
+        </label>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close="modal-habit">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============ Модалка: детали привычки (статистика) ============ -->
+  <div id="modal-stats" class="modal hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" data-close="modal-stats"></div>
+    <div class="modal-content">
+      <h2 id="stats-habit-name">—</h2>
+
+      <div class="stats-row">
+        <div class="stat">
+          <div id="stats-current-streak" class="stat-value">0</div>
+          <div class="stat-label">Текущий стрик</div>
+        </div>
+        <div class="stat">
+          <div id="stats-longest-streak" class="stat-value">0</div>
+          <div class="stat-label">Максимум</div>
+        </div>
+        <div class="stat">
+          <div id="stats-total" class="stat-value">0</div>
+          <div class="stat-label">Всего</div>
+        </div>
+      </div>
+
+      <h3>Последние 30 дней</h3>
+      <div id="calendar-30" class="calendar"></div>
+
+      <div class="modal-actions">
+        <button id="btn-delete-habit" type="button" class="btn btn-danger">Удалить</button>
+        <button type="button" class="btn btn-ghost" data-close="modal-stats">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ Тост-уведомления ============ -->
+  <div id="toast" class="toast hidden" role="status"></div>
+
+  <!-- Скрипты — модули, без бандлера -->
+  <script type="module" src="/static/js/app.js"></script>
+
+</body>
+</html>

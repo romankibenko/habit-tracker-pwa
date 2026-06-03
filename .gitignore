@@ -1,0 +1,42 @@
+# Переменные окружения и секреты
+.env
+.env.local
+*.pem
+*_secrets*
+
+# Виртуальное окружение
+.venv/
+venv/
+env/
+
+# VAPID ключи (не коммитим)
+vapid_private_key.pem
+vapid_public_key.pem
+
+# Кэш Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Логи
+*.log
+logs/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Системные
+.DS_Store
+Thumbs.db
+
+# Claude
+.claude/
+CLAUDE.md
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
