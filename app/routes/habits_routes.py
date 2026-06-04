@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
 from app.auth import CurrentUser
 from app.database import Database
@@ -79,11 +79,11 @@ def build_router(database: Database, get_current_user) -> APIRouter:
             )
         return HabitResponse(**dict(row))
 
-    @router.delete("/{habit_id}", status_code=204)
+    @router.delete("/{habit_id}", status_code=204, response_class=Response)
     async def delete_habit(
         habit_id: int,
         user: CurrentUser = Depends(get_current_user),
-    ) -> None:
+    ):
         result = await database.pool.execute(
             "DELETE FROM habits WHERE id = $1 AND user_id = $2",
             habit_id,
@@ -95,5 +95,6 @@ def build_router(database: Database, get_current_user) -> APIRouter:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Привычка не найдена",
             )
+        return Response(status_code=204)
 
     return router

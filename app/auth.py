@@ -5,23 +5,30 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
+import bcrypt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from app.config import JWTConfig
 
-_pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 _bearer_scheme = HTTPBearer(auto_error=False)
+
+# bcrypt ограничен 72 байтами на пароль — обрезаем заранее
+# (truncate тихо: пользователь нашего DTO ограничен EmailStr+min_length)
+_BCRYPT_MAX_BYTES = 72
+
+
+def _to_bcrypt_bytes(plain: str) -> bytes:
+    return plain.encode("utf-8")[:_BCRYPT_MAX_BYTES]
 
 
 def hash_password(plain: str) -> str:
-    return _pwd_context.hash(plain)
+    return bcrypt.hashpw(_to_bcrypt_bytes(plain), bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return _pwd_context.verify(plain, hashed)
+    return bcrypt.checkpw(_to_bcrypt_bytes(plain), hashed.encode("utf-8"))
 
 
 def create_access_token(user_id: int, email: str, config: JWTConfig) -> str:

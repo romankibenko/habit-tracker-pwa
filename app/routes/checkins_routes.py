@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 
 import asyncpg
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from app.auth import CurrentUser
 from app.database import Database
@@ -82,11 +82,13 @@ def build_router(database: Database, get_current_user) -> APIRouter:
             ) from error
         return CheckinResponse(**dict(row))
 
-    @router.delete("/api/checkins/{checkin_id}", status_code=204)
+    @router.delete(
+        "/api/checkins/{checkin_id}", status_code=204, response_class=Response
+    )
     async def delete_checkin(
         checkin_id: int,
         user: CurrentUser = Depends(get_current_user),
-    ) -> None:
+    ):
         # Проверяем владение через JOIN с habits
         result = await database.pool.execute(
             "DELETE FROM checkins c "
@@ -100,6 +102,7 @@ def build_router(database: Database, get_current_user) -> APIRouter:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Отметка не найдена",
             )
+        return Response(status_code=204)
 
     @router.get(
         "/api/habits/{habit_id}/checkins",
